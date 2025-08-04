@@ -10,11 +10,6 @@ import FAQ from "./pages/FAQ";
 import Support from "./pages/Support";
 import Categories from "./pages/Categories";
 import NotFound from "./pages/NotFound";
-import About from "./pages/About";
-import { Contact } from "lucide-react";
-import Categories from "./pages/Categories";
-import FAQ from "./pages/FAQ";
-import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
 

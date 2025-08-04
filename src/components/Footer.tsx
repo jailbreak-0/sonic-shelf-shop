@@ -89,7 +89,7 @@ export function Footer() {
             </div>
             <div>
               <p className="font-medium">Call Us</p>
-              <p className="text-muted-foreground">233-800-TECH-HUB</p>
+              <p className="text-muted-foreground">233-800-COMPU-TEX</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">

@@ -10,6 +10,7 @@ import FAQ from "./pages/FAQ";
 import Support from "./pages/Support";
 import Categories from "./pages/Categories";
 import NotFound from "./pages/NotFound";
+import ItemDetailsPage from "./pages/ItemDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/support" element={<Support />} />
           <Route path="/categories" element={<Categories />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/item/:id" element={<ItemDetailsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

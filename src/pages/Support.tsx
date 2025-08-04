@@ -49,7 +49,8 @@ const Support = () => {
 
         {/* Quick Contact Options */}
         <div className="grid md:grid-cols-3 gap-6 mb-16">
-          <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+          {/* Live Chat */}
+          {/* <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <MessageCircle className="h-12 w-12 mx-auto mb-4 text-primary" />
               <CardTitle>Live Chat</CardTitle>
@@ -59,8 +60,9 @@ const Support = () => {
               <p className="text-sm text-muted-foreground mb-4">Available 24/7</p>
               <Button className="w-full">Start Chat</Button>
             </CardContent>
-          </Card>
+          </Card> */}
 
+          {/* Phone Support */}
           <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <Phone className="h-12 w-12 mx-auto mb-4 text-primary" />
@@ -73,6 +75,7 @@ const Support = () => {
             </CardContent>
           </Card>
 
+          {/* Email Support */}
           <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <Mail className="h-12 w-12 mx-auto mb-4 text-primary" />
@@ -173,7 +176,7 @@ const Support = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Account Management</CardTitle>
-                  <CardDescription>Manage your TechShop account settings</CardDescription>
+                  <CardDescription>Manage your ComputeX account settings</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">

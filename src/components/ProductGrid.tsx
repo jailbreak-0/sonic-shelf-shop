@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, ShoppingCart, Eye, Heart } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client"; // adjust if path differs
 
 // Product images
 import laptopGaming from "@/assets/laptop-gaming.jpg";
 import smartphonePremium from "@/assets/smartphone-premium.jpg";
 import headsetGaming from "@/assets/headset-gaming.jpg";
 import laptopProfessional from "@/assets/laptop-professional.jpg";
+import { Link } from "react-router-dom";
 
 export interface Product {
   id: number;
@@ -40,7 +42,7 @@ const products: Product[] = [
   {
     id: 2,
     name: "Premium Smartphone Ultra",
-    price: 899,
+    price: 8999,
     rating: 4.9,
     reviews: 892,
     image: smartphonePremium,
@@ -51,8 +53,8 @@ const products: Product[] = [
   {
     id: 3,
     name: "Gaming Headset Elite",
-    price: 199,
-    originalPrice: 249,
+    price: 1999,
+    originalPrice: 2499,
     rating: 4.7,
     reviews: 156,
     image: headsetGaming,
@@ -63,7 +65,7 @@ const products: Product[] = [
   {
     id: 4,
     name: "Professional Laptop Air",
-    price: 999,
+    price: 9999,
     rating: 4.6,
     reviews: 324,
     image: laptopProfessional,
@@ -73,8 +75,8 @@ const products: Product[] = [
   {
     id: 5,
     name: "Gaming Laptop Pro X1",
-    price: 1299,
-    originalPrice: 1599,
+    price: 12999,
+    originalPrice: 15999,
     rating: 4.8,
     reviews: 247,
     image: laptopGaming,
@@ -85,7 +87,7 @@ const products: Product[] = [
   {
     id: 6,
     name: "Premium Smartphone Ultra",
-    price: 899,
+    price: 8999,
     rating: 4.9,
     reviews: 892,
     image: smartphonePremium,
@@ -124,16 +126,37 @@ export function ProductGrid({ selectedCategory, onAddToCart }: ProductGridProps)
     });
   };
 
-  return (
-    <section className="container mx-auto px-4 py-12">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-foreground mb-2">
-          {selectedCategory === "all" ? "All Products" : selectedCategory}
-        </h2>
-        <p className="text-muted-foreground">
-          Showing {filteredProducts.length} products
-        </p>
-      </div>
+    useEffect(() => {
+      const fetchItems = async () => {
+        const { data, error } = await supabase
+          .from("items")
+          .select("*")
+          .eq("is_active", true)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error fetching items:", error);
+        } else {
+          setItems(data);
+        }
+        setLoading(false);
+      };
+
+      fetchItems();
+    }, []);
+
+    if (loading) return <p>Loading products...</p>;
+
+    return (
+      <section className="container mx-auto px-4 py-12">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-2">
+            {selectedCategory === "all" ? "All Products" : selectedCategory}
+          </h2>
+          <p className="text-muted-foreground">
+            Showing {filteredProducts.length} products
+          </p>
+        </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProducts.map((product) => (
@@ -178,6 +201,8 @@ export function ProductGrid({ selectedCategory, onAddToCart }: ProductGridProps)
             </div>
 
             <CardContent className="p-4">
+              {items.map((item) =>(
+              <Link key={item.id} to={`/item/${item.id}`}>
               <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
                 {product.name}
               </h3>
@@ -200,11 +225,11 @@ export function ProductGrid({ selectedCategory, onAddToCart }: ProductGridProps)
 
               <div className="flex items-center space-x-2 mb-3">
                 <span className="text-2xl font-bold text-primary">
-                  ${product.price}
+                  ₵{product.price}
                 </span>
                 {product.originalPrice && (
                   <span className="text-lg text-muted-foreground line-through">
-                    ${product.originalPrice}
+                    ₵{product.originalPrice}
                   </span>
                 )}
               </div>
@@ -216,6 +241,7 @@ export function ProductGrid({ selectedCategory, onAddToCart }: ProductGridProps)
                   </div>
                 ))}
               </div>
+              </Link>)}
             </CardContent>
 
             <CardFooter className="p-4 pt-0">

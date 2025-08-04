@@ -99,7 +99,7 @@ const Contact = () => {
                   <Phone className="h-5 w-5 text-primary mt-0.5" />
                   <div>
                     <p className="font-medium">Phone Support</p>
-                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                    <p className="text-muted-foreground">+233 (555) 123-4567</p>
                     <p className="text-sm text-muted-foreground">Mon-Fri 9AM-6PM PST</p>
                   </div>
                 </div>
@@ -108,7 +108,7 @@ const Contact = () => {
                   <Mail className="h-5 w-5 text-primary mt-0.5" />
                   <div>
                     <p className="font-medium">Email Support</p>
-                    <p className="text-muted-foreground">support@techshop.com</p>
+                    <p className="text-muted-foreground">support@computex.com</p>
                     <p className="text-sm text-muted-foreground">Response within 24 hours</p>
                   </div>
                 </div>
@@ -128,20 +128,20 @@ const Contact = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
-                  Our Offices
+                  Our Office
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <p className="font-medium">Headquarters</p>
                   <p className="text-muted-foreground">
-                    123 Tech Street<br />
-                    San Francisco, CA 94105<br />
-                    United States
+                    Darkuman<br />
+                    Accra, HPXW 948<br />
+                    Ghana
                   </p>
                 </div>
                 
-                <div>
+                {/* <div>
                   <p className="font-medium">European Office</p>
                   <p className="text-muted-foreground">
                     456 Innovation Ave<br />
@@ -157,7 +157,7 @@ const Contact = () => {
                     Singapore 018956<br />
                     Singapore
                   </p>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
 
@@ -180,7 +180,7 @@ const Contact = () => {
                     <span className="text-muted-foreground">Closed</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-4">
-                    * All times are in Pacific Standard Time (PST)
+                    * All times are in Greenwich Mean Time (GMT)
                   </p>
                 </div>
               </CardContent>

@@ -1,12 +1,44 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { Header } from "@/components/Header";
+import { HeroSection } from "@/components/HeroSection";
+import { CategoryBanner } from "@/components/CategoryBanner";
+import { ProductGrid, Product } from "@/components/ProductGrid";
+import { Footer } from "@/components/Footer";
+import { Toaster } from "@/components/ui/toaster";
 
 const Index = () => {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [cartItems, setCartItems] = useState<Product[]>([]);
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  const handleAddToCart = (product: Product) => {
+    setCartItems(prev => [...prev, product]);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header 
+        cartCount={cartItems.length} 
+        onCategorySelect={handleCategorySelect}
+      />
+      
+      <main>
+        <HeroSection />
+        
+        <CategoryBanner onCategorySelect={handleCategorySelect} />
+        
+        <ProductGrid 
+          selectedCategory={selectedCategory}
+          onAddToCart={handleAddToCart}
+        />
+      </main>
+      
+      <Footer />
+      
+      <Toaster />
     </div>
   );
 };

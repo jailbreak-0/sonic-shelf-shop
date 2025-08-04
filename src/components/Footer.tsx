@@ -10,9 +10,11 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold bg-tech-gradient bg-clip-text text-transparent">
-              TechHub
-            </h3>
+            <a href="/">
+              <h3 className="text-2xl font-bold bg-tech-gradient bg-clip-text text-transparent">
+                ComputeX
+              </h3>
+            </a>
             <p className="text-muted-foreground">
               Your trusted partner for the latest technology. Quality products, competitive prices, and exceptional service.
             </p>
@@ -36,11 +38,13 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold">Quick Links</h4>
             <div className="space-y-2">
-              {["About Us", "Contact", "FAQ", "Support", "Returns", "Warranty"].map((link) => (
+              {["About", "Contact", "FAQ", "Support", "Returns", "Warranty"].map((link) => (
                 <div key={link}>
-                  <Button variant="link" className="h-auto p-0 text-muted-foreground hover:text-foreground">
-                    {link}
-                  </Button>
+                  <a href={`/${link.toLowerCase()}`}>
+                    <Button variant="link" className="h-auto p-0 text-muted-foreground hover:text-foreground">
+                      {link}
+                    </Button>
+                  </a>
                 </div>
               ))}
             </div>
@@ -85,7 +89,7 @@ export function Footer() {
             </div>
             <div>
               <p className="font-medium">Call Us</p>
-              <p className="text-muted-foreground">1-800-TECH-HUB</p>
+              <p className="text-muted-foreground">233-800-TECH-HUB</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -94,7 +98,7 @@ export function Footer() {
             </div>
             <div>
               <p className="font-medium">Email Us</p>
-              <p className="text-muted-foreground">support@techhub.com</p>
+              <p className="text-muted-foreground">support@computex.com</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -113,7 +117,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-muted-foreground">
-            © 2024 TechHub. All rights reserved.
+            © 2025 ComputeX. All rights reserved.
           </p>
           <div className="flex space-x-6">
             <Button variant="link" className="h-auto p-0 text-muted-foreground hover:text-foreground">

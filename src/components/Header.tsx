@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   cartCount: number;
@@ -32,6 +33,7 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-4">
+            <a href="/">
             <Button
               variant="ghost"
               size="icon"
@@ -40,8 +42,9 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
               <Menu className="h-5 w-5" />
             </Button>
             <h1 className="text-2xl font-bold bg-tech-gradient bg-clip-text text-transparent">
-              TechHub
+              ComputeX
             </h1>
+            </a>
           </div>
 
           {/* Search bar */}
@@ -76,13 +79,15 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
 
         {/* Navigation */}
         <nav className="hidden md:flex py-4 space-x-8">
-          <Button 
-            variant="ghost" 
-            onClick={() => onCategorySelect("all")}
-            className="font-medium"
-          >
-            All Products
-          </Button>
+          <Link hrefLang="en" to="/categories">
+            <Button 
+              variant="ghost" 
+              onClick={() => onCategorySelect("all")}
+              className="font-medium"
+            >
+              All Products
+            </Button>
+          </Link>
           {categories.map((category) => {
             const Icon = category.icon;
             return (

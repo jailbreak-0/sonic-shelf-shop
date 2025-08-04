@@ -93,11 +93,11 @@ export function CategoryBanner({ onCategorySelect }: CategoryBannerProps) {
 
       <div className="text-center mt-8">
         <Button 
-          variant="outline" 
+          variant="outline"
           onClick={() => onCategorySelect("all")}
           className="hover:bg-primary hover:text-primary-foreground"
         >
-          View All Categories
+          <a href="/categories" className="">View All Categories</a>
         </Button>
       </div>
     </section>

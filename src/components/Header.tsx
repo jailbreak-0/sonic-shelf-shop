@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { CartDrawer } from "@/components/CartDrawer";
 import { Search, ShoppingCart, User, Menu, Laptop, Smartphone, Headphones, Gamepad2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -66,14 +67,16 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs">
-                  {cartCount}
-                </Badge>
-              )}
-            </Button>
+            <CartDrawer>
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs">
+                    {cartCount}
+                  </Badge>
+                )}
+              </Button>
+            </CartDrawer>
           </div>
         </div>
 

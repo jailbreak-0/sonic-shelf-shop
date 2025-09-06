@@ -32,7 +32,7 @@ export function ProductGrid({ selectedCategory, onAddToCart }: ProductGridProps)
     const fetchProducts = async () => {
       setLoading(true);
       const { data, error } = await supabase
-        .from("products")
+        .from("products" as any)
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
@@ -44,8 +44,9 @@ export function ProductGrid({ selectedCategory, onAddToCart }: ProductGridProps)
           description: "Failed to load products. Please try again.",
           variant: "destructive",
         });
+        setProducts([]);
       } else {
-        setProducts(data || []);
+        setProducts((data as any) || []);
       }
       setLoading(false);
     };

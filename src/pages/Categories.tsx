@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,10 @@ import {
 const Categories = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [priceRange, setPriceRange] = useState([0, 5000]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("name");
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
 
   const categories = [
     {
@@ -35,7 +39,11 @@ const Categories = () => {
       icon: Laptop,
       count: 156,
       description: "Gaming, business, and ultrabooks",
-      featured: true
+      featured: true,
+      rating: 4.8,
+      priceRange: [299, 3499],
+      brands: ["Apple", "Dell", "HP", "Lenovo", "ASUS"],
+      features: ["Free Shipping", "Fast Delivery", "In Stock", "Best Sellers"]
     },
     {
       id: "smartphones",
@@ -43,7 +51,11 @@ const Categories = () => {
       icon: Smartphone,
       count: 89,
       description: "Latest flagship and budget phones",
-      featured: true
+      featured: true,
+      rating: 4.7,
+      priceRange: [199, 1599],
+      brands: ["Apple", "Samsung", "Google", "OnePlus"],
+      features: ["Free Shipping", "New Arrivals", "In Stock", "On Sale"]
     },
     {
       id: "audio",
@@ -51,7 +63,11 @@ const Categories = () => {
       icon: Headphones,
       count: 234,
       description: "Headphones, speakers, and earbuds",
-      featured: true
+      featured: true,
+      rating: 4.6,
+      priceRange: [29, 999],
+      brands: ["Sony", "Apple", "Samsung", "Sennheiser"],
+      features: ["Free Shipping", "Best Sellers", "In Stock"]
     },
     {
       id: "gaming",
@@ -59,7 +75,11 @@ const Categories = () => {
       icon: Gamepad2,
       count: 178,
       description: "Consoles, accessories, and peripherals",
-      featured: true
+      featured: true,
+      rating: 4.9,
+      priceRange: [19, 699],
+      brands: ["Microsoft", "Sony", "Nintendo", "Razer"],
+      features: ["Free Shipping", "Fast Delivery", "New Arrivals", "Best Sellers"]
     },
     {
       id: "monitors",
@@ -67,7 +87,11 @@ const Categories = () => {
       icon: Monitor,
       count: 67,
       description: "4K, gaming, and professional displays",
-      featured: false
+      featured: false,
+      rating: 4.5,
+      priceRange: [149, 2499],
+      brands: ["Dell", "ASUS", "LG", "Samsung"],
+      features: ["Free Shipping", "In Stock"]
     },
     {
       id: "cameras",
@@ -75,7 +99,11 @@ const Categories = () => {
       icon: Camera,
       count: 43,
       description: "DSLR, mirrorless, and action cameras",
-      featured: false
+      featured: false,
+      rating: 4.4,
+      priceRange: [299, 4999],
+      brands: ["Canon", "Nikon", "Sony", "Fujifilm"],
+      features: ["Free Shipping", "In Stock", "On Sale"]
     },
     {
       id: "tablets",
@@ -83,7 +111,11 @@ const Categories = () => {
       icon: Tablet,
       count: 52,
       description: "iPads, Android, and 2-in-1 devices",
-      featured: false
+      featured: false,
+      rating: 4.6,
+      priceRange: [129, 1899],
+      brands: ["Apple", "Samsung", "Microsoft", "Amazon"],
+      features: ["Free Shipping", "Best Sellers", "In Stock"]
     },
     {
       id: "wearables",
@@ -91,17 +123,86 @@ const Categories = () => {
       icon: Watch,
       count: 38,
       description: "Smartwatches and fitness trackers",
-      featured: false
+      featured: false,
+      rating: 4.3,
+      priceRange: [49, 799],
+      brands: ["Apple", "Samsung", "Garmin", "Fitbit"],
+      features: ["Free Shipping", "New Arrivals", "In Stock"]
     }
   ];
 
   const brands = [
-    "Apple", "Samsung", "Dell", "HP", "Lenovo", "ASUS", "Sony", "Microsoft", "Google", "OnePlus"
+    "Apple", "Samsung", "Dell", "HP", "Lenovo", "ASUS", "Sony", "Microsoft", "Google", "OnePlus", 
+    "Canon", "Nikon", "Fujifilm", "LG", "Razer", "Nintendo", "Sennheiser", "Garmin", "Fitbit", "Amazon"
   ];
 
   const features = [
     "Free Shipping", "Fast Delivery", "In Stock", "On Sale", "New Arrivals", "Best Sellers"
   ];
+
+  // Filter and sort categories
+  const filteredAndSortedCategories = useMemo(() => {
+    let filtered = categories.filter(category => {
+      // Search filter
+      const matchesSearch = !searchQuery || 
+        category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        category.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Price range filter
+      const matchesPrice = category.priceRange[0] <= priceRange[1] && category.priceRange[1] >= priceRange[0];
+
+      // Brand filter
+      const matchesBrand = selectedBrands.length === 0 || 
+        selectedBrands.some(brand => category.brands.includes(brand));
+
+      // Feature filter
+      const matchesFeatures = selectedFeatures.length === 0 || 
+        selectedFeatures.some(feature => category.features.includes(feature));
+
+      return matchesSearch && matchesPrice && matchesBrand && matchesFeatures;
+    });
+
+    // Sort categories
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "count":
+          return b.count - a.count;
+        case "popular":
+          return b.rating - a.rating;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [categories, searchQuery, priceRange, selectedBrands, selectedFeatures, sortBy]);
+
+  const handleBrandChange = (brand: string, checked: boolean) => {
+    if (checked) {
+      setSelectedBrands([...selectedBrands, brand]);
+    } else {
+      setSelectedBrands(selectedBrands.filter(b => b !== brand));
+    }
+  };
+
+  const handleFeatureChange = (feature: string, checked: boolean) => {
+    if (checked) {
+      setSelectedFeatures([...selectedFeatures, feature]);
+    } else {
+      setSelectedFeatures(selectedFeatures.filter(f => f !== feature));
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery("");
+    setPriceRange([0, 5000]);
+    setSelectedBrands([]);
+    setSelectedFeatures([]);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,7 +234,12 @@ const Categories = () => {
                   <label className="text-sm font-medium">Search</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search categories..." className="pl-10" />
+                    <Input 
+                      placeholder="Search categories..." 
+                      className="pl-10" 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -159,7 +265,11 @@ const Categories = () => {
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {brands.map((brand) => (
                       <div key={brand} className="flex items-center space-x-2">
-                        <Checkbox id={brand} />
+                        <Checkbox 
+                          id={brand} 
+                          checked={selectedBrands.includes(brand)}
+                          onCheckedChange={(checked) => handleBrandChange(brand, checked as boolean)}
+                        />
                         <label htmlFor={brand} className="text-sm cursor-pointer">
                           {brand}
                         </label>
@@ -174,7 +284,11 @@ const Categories = () => {
                   <div className="space-y-2">
                     {features.map((feature) => (
                       <div key={feature} className="flex items-center space-x-2">
-                        <Checkbox id={feature} />
+                        <Checkbox 
+                          id={feature} 
+                          checked={selectedFeatures.includes(feature)}
+                          onCheckedChange={(checked) => handleFeatureChange(feature, checked as boolean)}
+                        />
                         <label htmlFor={feature} className="text-sm cursor-pointer">
                           {feature}
                         </label>
@@ -183,7 +297,7 @@ const Categories = () => {
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={clearAllFilters}>
                   Clear All Filters
                 </Button>
               </CardContent>
@@ -196,12 +310,17 @@ const Categories = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <div className="flex items-center gap-4">
                 <span className="text-sm text-muted-foreground">
-                  Showing {categories.length} categories
+                  Showing {filteredAndSortedCategories.length} of {categories.length} categories
                 </span>
+                {(searchQuery || selectedBrands.length > 0 || selectedFeatures.length > 0 || priceRange[0] > 0 || priceRange[1] < 5000) && (
+                  <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                    Clear Filters
+                  </Button>
+                )}
               </div>
               
               <div className="flex items-center gap-4">
-                <Select defaultValue="name">
+                <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -235,49 +354,62 @@ const Categories = () => {
             </div>
 
             {/* Featured Categories */}
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">Featured Categories</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {categories.filter(cat => cat.featured).map((category) => {
-                  const IconComponent = category.icon;
-                  return (
-                    <Card key={category.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                              <IconComponent className="h-6 w-6 text-primary" />
+            {filteredAndSortedCategories.filter(cat => cat.featured).length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold mb-6">Featured Categories</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {filteredAndSortedCategories.filter(cat => cat.featured).map((category) => {
+                    const IconComponent = category.icon;
+                    return (
+                      <Card key={category.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                <IconComponent className="h-6 w-6 text-primary" />
+                              </div>
+                              <div>
+                                <CardTitle className="text-xl">{category.name}</CardTitle>
+                                <CardDescription>{category.description}</CardDescription>
+                              </div>
                             </div>
-                            <div>
-                              <CardTitle className="text-xl">{category.name}</CardTitle>
-                              <CardDescription>{category.description}</CardDescription>
+                            <Badge variant="secondary">{category.count}</Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span className="text-sm text-muted-foreground">{category.rating} avg rating</span>
                             </div>
+                            <Button size="sm">Browse</Button>
                           </div>
-                          <Badge variant="secondary">{category.count}</Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm text-muted-foreground">4.8 avg rating</span>
-                          </div>
-                          <Button size="sm">Browse</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* All Categories */}
             <div>
               <h2 className="text-2xl font-bold mb-6">All Categories</h2>
               
-              {viewMode === "grid" ? (
+              {filteredAndSortedCategories.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-xl font-semibold mb-2">No categories found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Try adjusting your filters or search terms
+                  </p>
+                  <Button variant="outline" onClick={clearAllFilters}>
+                    Clear All Filters
+                  </Button>
+                </div>
+              ) : viewMode === "grid" ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {categories.map((category) => {
+                  {filteredAndSortedCategories.map((category) => {
                     const IconComponent = category.icon;
                     return (
                       <Card key={category.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
@@ -289,9 +421,16 @@ const Categories = () => {
                           <CardDescription>{category.description}</CardDescription>
                         </CardHeader>
                         <CardContent className="text-center">
+                          <div className="flex items-center justify-center gap-2 mb-3">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm text-muted-foreground">{category.rating}</span>
+                          </div>
                           <div className="flex items-center justify-between mb-4">
                             <Badge variant="outline">{category.count} products</Badge>
                             {category.featured && <Badge>Featured</Badge>}
+                          </div>
+                          <div className="text-xs text-muted-foreground mb-4">
+                            ${category.priceRange[0]} - ${category.priceRange[1]}
                           </div>
                           <Button className="w-full">View Products</Button>
                         </CardContent>
@@ -301,7 +440,7 @@ const Categories = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {categories.map((category) => {
+                  {filteredAndSortedCategories.map((category) => {
                     const IconComponent = category.icon;
                     return (
                       <Card key={category.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
@@ -317,6 +456,7 @@ const Categories = () => {
                                 <div className="flex items-center gap-2 mt-1">
                                   <Badge variant="outline">{category.count} products</Badge>
                                   {category.featured && <Badge>Featured</Badge>}
+                                  <Badge variant="secondary">${category.priceRange[0]} - ${category.priceRange[1]}</Badge>
                                 </div>
                               </div>
                             </div>
@@ -324,7 +464,7 @@ const Categories = () => {
                               <div className="text-right hidden sm:block">
                                 <div className="flex items-center gap-1">
                                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="text-sm text-muted-foreground">4.8</span>
+                                  <span className="text-sm text-muted-foreground">{category.rating}</span>
                                 </div>
                               </div>
                               <Button>Browse</Button>

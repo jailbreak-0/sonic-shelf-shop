@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CartDrawer } from "@/components/CartDrawer";
-import { Search, ShoppingCart, User, Menu, Laptop, Smartphone, Headphones, Gamepad2 } from "lucide-react";
+import { SearchWithSuggestions } from "@/components/SearchWithSuggestions";
+import { ShoppingCart, User, Menu, Laptop, Smartphone, Headphones, Gamepad2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,15 @@ interface HeaderProps {
 }
 
 export function Header({ cartCount, onCategorySelect }: HeaderProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const handleSearch = (query: string) => {
+    console.log("Searching for:", query);
+    // Here you could implement search functionality
+  };
+
+  const handleProductSelect = (productId: string) => {
+    console.log("Selected product:", productId);
+    // Here you could navigate to the product page
+  };
 
   const categories = [
     { name: "Laptops", icon: Laptop },
@@ -50,16 +58,12 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
 
           {/* Search bar */}
           <div className="hidden md:flex flex-1 max-w-lg mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search for products..."
-                className="pl-10 pr-4"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+            <SearchWithSuggestions
+              placeholder="Search for products..."
+              onSearch={handleSearch}
+              onProductSelect={handleProductSelect}
+              className="w-full"
+            />
           </div>
 
           {/* User actions */}
@@ -132,16 +136,12 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
 
         {/* Mobile search */}
         <div className="md:hidden pb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <SearchWithSuggestions
+            placeholder="Search products..."
+            onSearch={handleSearch}
+            onProductSelect={handleProductSelect}
+            className="w-full"
+          />
         </div>
       </div>
     </header>

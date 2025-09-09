@@ -22,7 +22,7 @@ const EnhancedCategories = () => {
   const [sortBy, setSortBy] = useState('name');
   const [loading, setLoading] = useState(true);
   
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
 
   const categoryIcons = {
     cpu: Cpu,
@@ -117,8 +117,7 @@ const EnhancedCategories = () => {
   }, [products, searchTerm, selectedCategory, priceRange, sortBy]);
 
   const handleAddToCart = (product: any) => {
-    // Simple implementation - will work with existing cart structure
-    console.log('Adding to cart:', product);
+    addItem(product);
   };
 
   if (loading) {

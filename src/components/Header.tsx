@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CartDrawer } from "@/components/CartDrawer";
 import { SearchWithSuggestions } from "@/components/SearchWithSuggestions";
-import { ShoppingCart, User, Menu, Laptop, Smartphone, Headphones, Gamepad2 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useAuth } from "@/contexts/AuthContext";
+import { ShoppingCart, User, Menu, Laptop, Smartphone, Headphones, Gamepad2, Bell, Sun, Moon, HelpCircle, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +20,21 @@ interface HeaderProps {
 }
 
 export function Header({ cartCount, onCategorySelect }: HeaderProps) {
+  const { theme, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
   const handleSearch = (query: string) => {
     console.log("Searching for:", query);
     // Here you could implement search functionality
@@ -68,9 +85,61 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
 
           {/* User actions */}
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
+            {/* Notifications */}
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-destructive">
+                3
+              </Badge>
             </Button>
+
+            {/* Theme Toggle */}
+            {mounted && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              >
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+            )}
+
+            {/* Help Center */}
+            <Link to="/support">
+              <Button variant="ghost" size="icon">
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+            </Link>
+
+            {/* User Profile/Auth */}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+
             <CartDrawer>
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
@@ -86,13 +155,18 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
 
         {/* Navigation */}
         <nav className="hidden md:flex py-4 space-x-8">
-          <Link hrefLang="en" to="/categories">
+          <Link to="/categories">
             <Button 
               variant="ghost" 
               onClick={() => onCategorySelect("all")}
               className="font-medium"
             >
               All Products
+            </Button>
+          </Link>
+          <Link to="/pc-builder">
+            <Button variant="ghost" className="font-medium">
+              PC Builder
             </Button>
           </Link>
           {categories.map((category) => {

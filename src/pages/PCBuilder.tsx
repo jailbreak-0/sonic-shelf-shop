@@ -5,11 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { BuildRequestModal } from '@/components/BuildRequestModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { useCart } from '@/contexts/CartContext';
 import { 
   Cpu, 
   Monitor, 
@@ -23,7 +25,9 @@ import {
   Trash2,
   Save,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  ExternalLink,
+  ShoppingBag
 } from 'lucide-react';
 
 interface Component {
@@ -69,9 +73,11 @@ const PCBuilder = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [compatibilityIssues, setCompatibilityIssues] = useState<string[]>([]);
+  const [showBuildRequest, setShowBuildRequest] = useState(false);
   
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { state: cartState } = useCart();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -387,6 +393,15 @@ const PCBuilder = () => {
                       <Save className="h-4 w-4 mr-2" />
                       {saving ? 'Saving...' : 'Save Build'}
                     </Button>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => setShowBuildRequest(true)}
+                      disabled={!build.some(b => b.component)}
+                    >
+                      <ShoppingBag className="h-4 w-4 mr-2" />
+                      Request Build Service
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -425,6 +440,16 @@ const PCBuilder = () => {
           </div>
         </div>
       </main>
+      
+      <BuildRequestModal 
+        isOpen={showBuildRequest}
+        onClose={() => setShowBuildRequest(false)}
+        components={build.filter(item => item.component).map(item => ({
+          category: item.category,
+          component: item.component!
+        }))}
+        totalPrice={totalPrice}
+      />
       
       <Footer />
     </div>

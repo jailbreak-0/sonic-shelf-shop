@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { CategoryBanner } from "@/components/CategoryBanner";
 import { ProductGrid } from "@/components/ProductGrid";
+import { PCBuilderCTA } from "@/components/PCBuilderCTA";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { useCart } from "@/contexts/CartContext";
@@ -24,6 +25,8 @@ const Index = () => {
       
       <main>
         <HeroSection />
+        
+        <PCBuilderCTA />
         
         <CategoryBanner onCategorySelect={handleCategorySelect} />
         

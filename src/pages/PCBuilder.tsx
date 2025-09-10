@@ -1,265 +1,198 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BuildRequestModal } from '@/components/BuildRequestModal';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { YourBuilds } from '@/components/YourBuilds';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
-import { 
-  Cpu, 
-  Monitor, 
-  CircuitBoard, 
-  MemoryStick, 
-  HardDrive, 
-  Zap, 
-  Box, 
-  Fan,
-  Plus,
-  Trash2,
-  Save,
-  AlertTriangle,
-  CheckCircle,
-  ExternalLink,
-  ShoppingBag
-} from 'lucide-react';
-
-interface Component {
-  id: string;
-  name: string;
-  brand: string;
-  price: number;
-  image_url: string | null;
-  specifications: any;
-  compatibility_data: any;
-  category_id: string;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  icon: string;
-}
-
-interface BuildComponent {
-  category: string;
-  component: Component | null;
-}
-
-const categoryIcons: Record<string, any> = {
-  cpu: Cpu,
-  gpu: Monitor,
-  motherboard: CircuitBoard,
-  ram: MemoryStick,
-  storage: HardDrive,
-  psu: Zap,
-  case: Box,
-  cooling: Fan,
-};
+import { useToast } from '@/hooks/use-toast';
+import { Cpu, Monitor, CircuitBoard, MemoryStick, HardDrive, Zap, Box, Fan, Plus, Minus, Trash2, Settings, DollarSign, Save } from 'lucide-react';
 
 const PCBuilder = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [components, setComponents] = useState<Component[]>([]);
-  const [build, setBuild] = useState<BuildComponent[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [buildName, setBuildName] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [compatibilityIssues, setCompatibilityIssues] = useState<string[]>([]);
-  const [showBuildRequest, setShowBuildRequest] = useState(false);
-  
-  const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
+  const { user } = useAuth();
   const { state: cartState } = useCart();
-  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [components, setComponents] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedComponents, setSelectedComponents] = useState({});
+  const [buildName, setBuildName] = useState('');
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [showBuildRequest, setShowBuildRequest] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [savedBuilds, setSavedBuilds] = useState([]);
+  const [activeTab, setActiveTab] = useState('builder');
+
+  const categoryIcons = {
+    cpu: Cpu,
+    gpu: Monitor,
+    motherboard: CircuitBoard,
+    ram: MemoryStick,
+    storage: HardDrive,
+    psu: Zap,
+    case: Box,
+    cooling: Fan,
+  };
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth', { state: { from: { pathname: '/pc-builder' } } });
-      return;
-    }
-    
+    fetchData();
     if (user) {
-      fetchData();
+      fetchUserBuilds();
     }
-  }, [user, authLoading, navigate]);
+  }, [user]);
 
   const fetchData = async () => {
     try {
       const [categoriesResult, componentsResult] = await Promise.all([
         supabase.from('component_categories').select('*').order('name'),
-        supabase.from('pc_components').select('*').eq('is_active', true)
+        supabase.from('pc_components').select('*, component_categories(name, slug)').eq('is_active', true)
       ]);
-
+      
       if (categoriesResult.error) throw categoriesResult.error;
       if (componentsResult.error) throw componentsResult.error;
-
+      
       setCategories(categoriesResult.data || []);
       setComponents(componentsResult.data || []);
-      
-      // Initialize build with empty slots
-      const initialBuild = (categoriesResult.data || []).map((cat: Category) => ({
-        category: cat.slug,
-        component: null,
-      }));
-      setBuild(initialBuild);
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load components. Please try again.",
-      });
     } finally {
       setLoading(false);
     }
   };
 
-  const checkCompatibility = (newBuild: BuildComponent[]) => {
-    const issues: string[] = [];
+  const fetchUserBuilds = async () => {
+    if (!user) return;
     
-    const cpu = newBuild.find(b => b.category === 'cpu')?.component;
-    const motherboard = newBuild.find(b => b.category === 'motherboard')?.component;
-    const ram = newBuild.find(b => b.category === 'ram')?.component;
-    const gpu = newBuild.find(b => b.category === 'gpu')?.component;
-    const psu = newBuild.find(b => b.category === 'psu')?.component;
-
-    // CPU and Motherboard socket compatibility
-    if (cpu && motherboard) {
-      const cpuSocket = cpu.compatibility_data?.socket;
-      const mbSocket = motherboard.compatibility_data?.cpu_socket;
-      if (cpuSocket && mbSocket && cpuSocket !== mbSocket) {
-        issues.push(`CPU socket (${cpuSocket}) is not compatible with motherboard socket (${mbSocket})`);
-      }
-    }
-
-    // RAM and Motherboard compatibility
-    if (ram && motherboard) {
-      const ramType = ram.compatibility_data?.memory_type;
-      const mbMemoryTypes = motherboard.compatibility_data?.memory_type;
-      if (ramType && mbMemoryTypes && ramType !== mbMemoryTypes) {
-        issues.push(`RAM type (${ramType}) is not compatible with motherboard (${mbMemoryTypes})`);
-      }
-    }
-
-    // GPU and PSU power compatibility
-    if (gpu && psu) {
-      const gpuPowerReq = parseInt(gpu.compatibility_data?.power_requirement?.replace('W', '') || '0');
-      const psuWattage = psu.compatibility_data?.wattage || 0;
-      if (gpuPowerReq > psuWattage * 0.8) { // 80% rule for PSU
-        issues.push(`PSU wattage (${psuWattage}W) may be insufficient for GPU (requires ${gpuPowerReq}W)`);
-      }
-    }
-
-    setCompatibilityIssues(issues);
-  };
-
-  const addComponent = (component: Component) => {
-    const category = categories.find(c => c.id === component.category_id);
-    if (!category) return;
-
-    const newBuild = [...build];
-    const buildIndex = newBuild.findIndex(b => b.category === category.slug);
-    if (buildIndex >= 0) {
-      newBuild[buildIndex].component = component;
-      setBuild(newBuild);
-      checkCompatibility(newBuild);
-      setSelectedCategory(null);
+    try {
+      const { data, error } = await supabase
+        .from('pc_builds')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
       
-      toast({
-        title: "Component Added",
-        description: `${component.name} has been added to your build.`,
-      });
-    }
-  };
-
-  const removeComponent = (category: string) => {
-    const newBuild = [...build];
-    const buildIndex = newBuild.findIndex(b => b.category === category);
-    if (buildIndex >= 0) {
-      newBuild[buildIndex].component = null;
-      setBuild(newBuild);
-      checkCompatibility(newBuild);
+      if (error) throw error;
+      setSavedBuilds(data || []);
+    } catch (error) {
+      console.error('Error fetching user builds:', error);
     }
   };
 
   const saveBuild = async () => {
-    if (!buildName.trim()) {
+    if (!user || !buildName) {
       toast({
-        variant: "destructive",
         title: "Error",
-        description: "Please enter a name for your build.",
+        description: "Please enter a build name and ensure you're logged in.",
+        variant: "destructive",
       });
       return;
     }
-
-    const componentsData = build.reduce((acc, item) => {
-      if (item.component) {
-        acc[item.category] = {
-          id: item.component.id,
-          name: item.component.name,
-          price: item.component.price,
-        };
-      }
-      return acc;
-    }, {} as any);
-
-    const totalPrice = build.reduce((total, item) => {
-      return total + (item.component?.price || 0);
-    }, 0);
-
-    setSaving(true);
+    
     try {
+      const buildData = {
+        name: buildName,
+        user_id: user.id,
+        components: selectedComponents,
+        total_price: totalPrice,
+        is_public: false
+      };
+      
       const { error } = await supabase
         .from('pc_builds')
-        .insert({
-          user_id: user?.id,
-          name: buildName,
-          components: componentsData,
-          total_price: totalPrice,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Build Saved",
-        description: "Your PC build has been saved successfully!",
-      });
+        .insert([buildData]);
       
-      setBuildName('');
+      if (error) throw error;
+      
+      // Refresh builds list
+      fetchUserBuilds();
+      
+      toast({
+        title: "Success",
+        description: "Build saved successfully!",
+      });
     } catch (error) {
       console.error('Error saving build:', error);
       toast({
-        variant: "destructive",
         title: "Error",
         description: "Failed to save build. Please try again.",
+        variant: "destructive",
       });
-    } finally {
-      setSaving(false);
     }
   };
 
-  const totalPrice = build.reduce((total, item) => {
-    return total + (item.component?.price || 0);
-  }, 0);
-
-  const getCategoryComponents = (categorySlug: string) => {
-    const category = categories.find(c => c.slug === categorySlug);
-    if (!category) return [];
-    return components.filter(c => c.category_id === category.id);
+  const loadBuild = (build: any) => {
+    setBuildName(build.name);
+    setSelectedComponents(build.components || {});
+    setActiveTab('builder');
+    
+    // Recalculate total price
+    const total = Object.values(build.components || {}).reduce((sum: number, component: any) => {
+      return sum + (typeof component?.price === 'number' ? component.price : 0);
+    }, 0);
+    setTotalPrice(total);
   };
 
-  if (authLoading || loading) {
+  const deleteBuild = async (buildId: string) => {
+    if (!confirm('Are you sure you want to delete this build?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('pc_builds')
+        .delete()
+        .eq('id', buildId);
+      
+      if (error) throw error;
+      
+      // Refresh builds list
+      fetchUserBuilds();
+      
+      toast({
+        title: "Success",
+        description: "Build deleted successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting build:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete build. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const selectComponent = (category: string, component: any) => {
+    const newComponents = { ...selectedComponents, [category]: component };
+    setSelectedComponents(newComponents);
+    
+    // Recalculate total
+    const total = Object.values(newComponents).reduce((sum: number, comp: any) => {
+      return sum + (typeof comp?.price === 'number' ? comp.price : 0);
+    }, 0);
+    setTotalPrice(total);
+  };
+
+  const removeComponent = (category: string) => {
+    const newComponents = { ...selectedComponents };
+    delete newComponents[category];
+    setSelectedComponents(newComponents);
+    
+    // Recalculate total
+    const total = Object.values(newComponents).reduce((sum: number, comp: any) => {
+      return sum + (typeof comp?.price === 'number' ? comp.price : 0);
+    }, 0);
+    setTotalPrice(total);
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartCount={0} onCategorySelect={() => {}} />
+        <Header cartCount={cartState.itemCount} onCategorySelect={() => {}} />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -273,180 +206,177 @@ const PCBuilder = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartCount={0} onCategorySelect={() => {}} />
+      <Header cartCount={cartState.itemCount} onCategorySelect={() => {}} />
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">PC Builder</h1>
           <p className="text-muted-foreground">
-            Build your perfect PC with compatibility checking and price calculation.
+            Build your dream PC with our component compatibility checker and price calculator.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Build Summary */}
-          <div className="lg:col-span-2 space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="builder">PC Builder</TabsTrigger>
+            <TabsTrigger value="builds">Your Builds</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="builder" className="space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle>Your Build</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Build Configuration
+                </CardTitle>
                 <CardDescription>
-                  Select components for each category to build your PC
+                  Configure your PC build by selecting components for each category.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {build.map((item) => {
-                  const category = categories.find(c => c.slug === item.category);
-                  const IconComponent = category ? categoryIcons[category.slug] || Box : Box;
-                  
-                  return (
-                    <div key={item.category} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <IconComponent className="h-8 w-8 text-muted-foreground" />
-                        <div>
-                          <h4 className="font-medium">{category?.name}</h4>
-                          {item.component ? (
-                            <div>
-                              <p className="text-sm text-muted-foreground">{item.component.name}</p>
-                              <p className="text-sm font-medium">${item.component.price}</p>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">Not selected</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {item.component && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeComponent(item.category)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedCategory(item.category)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-
-            {/* Compatibility Check */}
-            {compatibilityIssues.length > 0 && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-1">
-                    <p className="font-medium">Compatibility Issues:</p>
-                    {compatibilityIssues.map((issue, index) => (
-                      <p key={index} className="text-sm">• {issue}</p>
-                    ))}
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {compatibilityIssues.length === 0 && build.some(b => b.component) && (
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  All selected components are compatible!
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-
-          {/* Component Selection & Summary */}
-          <div className="space-y-6">
-            {/* Price Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Build Summary</CardTitle>
-              </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-2xl font-bold">
-                    <span>Total:</span>
-                    <span>${totalPrice.toFixed(2)}</span>
-                  </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      placeholder="Build name"
-                      value={buildName}
-                      onChange={(e) => setBuildName(e.target.value)}
-                      className="w-full p-2 border rounded"
-                    />
-                    <Button 
-                      className="w-full" 
-                      onClick={saveBuild}
-                      disabled={saving || !buildName.trim() || !build.some(b => b.component)}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      {saving ? 'Saving...' : 'Save Build'}
-                    </Button>
-                    <Button 
-                      className="w-full" 
-                      variant="outline"
-                      onClick={() => setShowBuildRequest(true)}
-                      disabled={!build.some(b => b.component)}
-                    >
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      Request Build Service
-                    </Button>
-                  </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="build-name">Build Name</Label>
+                  <Input
+                    id="build-name"
+                    placeholder="Enter a name for your build..."
+                    value={buildName}
+                    onChange={(e) => setBuildName(e.target.value)}
+                  />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Component Selection */}
-            {selectedCategory && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    Select {categories.find(c => c.slug === selectedCategory)?.name}
-                  </CardTitle>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setSelectedCategory(null)}
-                  >
-                    Cancel
-                  </Button>
-                </CardHeader>
-                <CardContent className="space-y-4 max-h-96 overflow-y-auto">
-                  {getCategoryComponents(selectedCategory).map((component) => (
-                    <div 
-                      key={component.id} 
-                      className="p-3 border rounded-lg cursor-pointer hover:bg-accent"
-                      onClick={() => addComponent(component)}
-                    >
-                      <h4 className="font-medium">{component.name}</h4>
-                      <p className="text-sm text-muted-foreground">{component.brand}</p>
-                      <p className="text-sm font-medium">${component.price}</p>
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Component Categories */}
+              <div className="lg:col-span-2 space-y-6">
+                {categories.map((category) => {
+                  const IconComponent = categoryIcons[category.slug] || Box;
+                  const selectedComponent = selectedComponents[category.slug];
+                  const categoryComponents = components.filter(c => 
+                    c.component_categories?.slug === category.slug
+                  );
+
+                  return (
+                    <Card key={category.id}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <IconComponent className="h-5 w-5" />
+                          {category.name}
+                        </CardTitle>
+                        <CardDescription>
+                          {selectedComponent ? selectedComponent.name : `Select a ${category.name.toLowerCase()}`}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {selectedComponent ? (
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{selectedComponent.name}</h4>
+                              <p className="text-sm text-muted-foreground">{selectedComponent.brand}</p>
+                              <p className="text-lg font-bold text-primary">₵{selectedComponent.price}</p>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeComponent(category.slug)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <p className="text-muted-foreground">No component selected</p>
+                            <div className="grid gap-2 max-h-48 overflow-y-auto">
+                              {categoryComponents.map((component) => (
+                                <div
+                                  key={component.id}
+                                  className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors"
+                                  onClick={() => selectComponent(category.slug, component)}
+                                >
+                                  <div>
+                                    <h5 className="font-medium">{component.name}</h5>
+                                    <p className="text-sm text-muted-foreground">{component.brand}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-bold">₵{component.price}</p>
+                                    <Button size="sm" variant="outline">
+                                      <Plus className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Build Summary */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="h-5 w-5" />
+                      Build Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Components:</span>
+                        <span>{Object.keys(selectedComponents).length}</span>
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Total:</span>
+                        <span>₵{totalPrice.toFixed(2)}</span>
+                      </div>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+
+                    <div className="space-y-2">
+                      <Button 
+                        onClick={saveBuild}
+                        disabled={!user || !buildName || Object.keys(selectedComponents).length === 0}
+                        className="w-full"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Build
+                      </Button>
+                      <Button 
+                        onClick={() => setShowBuildRequest(true)}
+                        disabled={Object.keys(selectedComponents).length === 0}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        Request Build Service
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="builds">
+            <YourBuilds 
+              builds={savedBuilds}
+              onLoadBuild={loadBuild}
+              onDeleteBuild={deleteBuild}
+            />
+          </TabsContent>
+        </Tabs>
       </main>
       
       <BuildRequestModal 
         isOpen={showBuildRequest}
         onClose={() => setShowBuildRequest(false)}
-        components={build.filter(item => item.component).map(item => ({
-          category: item.category,
-          component: item.component!
+        components={Object.entries(selectedComponents).map(([category, component]) => ({
+          category,
+          component
         }))}
         totalPrice={totalPrice}
       />

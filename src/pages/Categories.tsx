@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CategoryUpdater } from "@/components/CategoryUpdater";
+import { useCart } from "@/contexts/CartContext";
 import { 
   Search, 
   Filter, 
@@ -25,6 +27,7 @@ import {
 } from "lucide-react";
 
 const Categories = () => {
+  const { state: cartState } = useCart();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -206,7 +209,7 @@ const Categories = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartCount={0} onCategorySelect={() => {}} />
+      <Header cartCount={cartState.itemCount} onCategorySelect={() => {}} />
       
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -353,49 +356,8 @@ const Categories = () => {
               </div>
             </div>
 
-            {/* Featured Categories */}
-            {filteredAndSortedCategories.filter(cat => cat.featured).length > 0 && (
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold mb-6">Featured Categories</h2>
-                <div className="grid md:grid-cols-2 gap-6">
-                  {filteredAndSortedCategories.filter(cat => cat.featured).map((category) => {
-                    const IconComponent = category.icon;
-                    return (
-                      <Card key={category.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                <IconComponent className="h-6 w-6 text-primary" />
-                              </div>
-                              <div>
-                                <CardTitle className="text-xl">{category.name}</CardTitle>
-                                <CardDescription>{category.description}</CardDescription>
-                              </div>
-                            </div>
-                            <Badge variant="secondary">{category.count}</Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm text-muted-foreground">{category.rating} avg rating</span>
-                            </div>
-                            <Button size="sm">Browse</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             {/* All Categories */}
             <div>
-              <h2 className="text-2xl font-bold mb-6">All Categories</h2>
-              
               {filteredAndSortedCategories.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">🔍</div>
@@ -407,74 +369,8 @@ const Categories = () => {
                     Clear All Filters
                   </Button>
                 </div>
-              ) : viewMode === "grid" ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredAndSortedCategories.map((category) => {
-                    const IconComponent = category.icon;
-                    return (
-                      <Card key={category.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
-                        <CardHeader className="text-center">
-                          <div className="p-4 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors w-fit mx-auto">
-                            <IconComponent className="h-8 w-8 text-primary" />
-                          </div>
-                          <CardTitle>{category.name}</CardTitle>
-                          <CardDescription>{category.description}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-center">
-                          <div className="flex items-center justify-center gap-2 mb-3">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm text-muted-foreground">{category.rating}</span>
-                          </div>
-                          <div className="flex items-center justify-between mb-4">
-                            <Badge variant="outline">{category.count} products</Badge>
-                            {category.featured && <Badge>Featured</Badge>}
-                          </div>
-                          <div className="text-xs text-muted-foreground mb-4">
-                            ${category.priceRange[0]} - ${category.priceRange[1]}
-                          </div>
-                          <Button className="w-full">View Products</Button>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
               ) : (
-                <div className="space-y-4">
-                  {filteredAndSortedCategories.map((category) => {
-                    const IconComponent = category.icon;
-                    return (
-                      <Card key={category.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                <IconComponent className="h-6 w-6 text-primary" />
-                              </div>
-                              <div>
-                                <h3 className="text-lg font-semibold">{category.name}</h3>
-                                <p className="text-muted-foreground">{category.description}</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge variant="outline">{category.count} products</Badge>
-                                  {category.featured && <Badge>Featured</Badge>}
-                                  <Badge variant="secondary">${category.priceRange[0]} - ${category.priceRange[1]}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right hidden sm:block">
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="text-sm text-muted-foreground">{category.rating}</span>
-                                </div>
-                              </div>
-                              <Button>Browse</Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+                <CategoryUpdater />
               )}
             </div>
           </div>

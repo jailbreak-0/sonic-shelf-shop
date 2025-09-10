@@ -156,11 +156,7 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
         {/* Navigation */}
         <nav className="hidden md:flex py-4 space-x-8">
           <Link to="/categories">
-            <Button 
-              variant="ghost" 
-              onClick={() => onCategorySelect("all")}
-              className="font-medium"
-            >
+            <Button variant="ghost" className="font-medium">
               All Products
             </Button>
           </Link>
@@ -169,43 +165,23 @@ export function Header({ cartCount, onCategorySelect }: HeaderProps) {
               PC Builder
             </Button>
           </Link>
-          {categories.map((category) => {
-            const Icon = category.icon;
-            return (
-              <Button
-                key={category.name}
-                variant="ghost"
-                onClick={() => onCategorySelect(category.name)}
-                className="flex items-center space-x-2 font-medium"
-              >
-                <Icon className="h-4 w-4" />
-                <span>{category.name}</span>
+          <Link to="/about">
+            <Button variant="ghost" className="font-medium">
+              About
+            </Button>
+          </Link>
+          <Link to="/contact">
+            <Button variant="ghost" className="font-medium">
+              Contact
+            </Button>
+          </Link>
+          {user && (
+            <Link to="/admin">
+              <Button variant="ghost" className="font-medium">
+                {user && (user as any).role === 'admin' ? 'Admin Panel' : 'My Account'}
               </Button>
-            );
-          })}
-          
-          {/* Mobile Categories Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="outline" size="sm">
-                Categories
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => onCategorySelect("all")}>
-                All Products
-              </DropdownMenuItem>
-              {categories.map((category) => (
-                <DropdownMenuItem
-                  key={category.name}
-                  onClick={() => onCategorySelect(category.name)}
-                >
-                  <category.icon className="mr-2 h-4 w-4" />
-                  {category.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Link>
+          )}
         </nav>
 
         {/* Mobile search */}

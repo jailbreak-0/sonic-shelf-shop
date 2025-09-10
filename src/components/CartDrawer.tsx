@@ -43,9 +43,9 @@ export function CartDrawer({ children }: CartDrawerProps) {
               <p className="text-muted-foreground text-center mb-4">
                 Your cart is empty
               </p>
-              <Link to="/">
+              <SheetTrigger asChild>
                 <Button variant="outline">Continue Shopping</Button>
-              </Link>
+              </SheetTrigger>
             </div>
           ) : (
             <>

@@ -4,6 +4,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { CategoryBanner } from "@/components/CategoryBanner";
 import { ProductGrid } from "@/components/ProductGrid";
 import { PCBuilderCTA } from "@/components/PCBuilderCTA";
+import { Newsletter } from "@/components/Newsletter";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { useCart } from "@/contexts/CartContext";
@@ -27,6 +28,8 @@ const Index = () => {
         <HeroSection />
         
         <PCBuilderCTA />
+        
+        <Newsletter />
         
         <CategoryBanner onCategorySelect={handleCategorySelect} />
         

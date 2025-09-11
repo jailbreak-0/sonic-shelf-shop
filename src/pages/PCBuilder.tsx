@@ -132,8 +132,10 @@ const PCBuilder = () => {
     setActiveTab('builder');
     
     // Recalculate total price
-    const total = Object.values(build.components || {}).reduce((sum: number, component: any) => {
-      return sum + (typeof component?.price === 'number' ? component.price : 0);
+    const components = Object.values(build.components || {}) as any[];
+    const total: number = components.reduce((sum: number, component: any) => {
+      const price = typeof component?.price === 'number' ? component.price : 0;
+      return sum + price;
     }, 0);
     setTotalPrice(total);
   };
@@ -171,8 +173,10 @@ const PCBuilder = () => {
     setSelectedComponents(newComponents);
     
     // Recalculate total
-    const total = Object.values(newComponents).reduce((sum: number, comp: any) => {
-      return sum + (typeof comp?.price === 'number' ? comp.price : 0);
+    const components = Object.values(newComponents) as any[];
+    const total: number = components.reduce((sum: number, comp: any) => {
+      const price = typeof comp?.price === 'number' ? comp.price : 0;
+      return sum + price;
     }, 0);
     setTotalPrice(total);
   };
@@ -183,8 +187,10 @@ const PCBuilder = () => {
     setSelectedComponents(newComponents);
     
     // Recalculate total
-    const total = Object.values(newComponents).reduce((sum: number, comp: any) => {
-      return sum + (typeof comp?.price === 'number' ? comp.price : 0);
+    const components = Object.values(newComponents) as any[];
+    const total: number = components.reduce((sum: number, comp: any) => {
+      const price = typeof comp?.price === 'number' ? comp.price : 0;
+      return sum + price;
     }, 0);
     setTotalPrice(total);
   };

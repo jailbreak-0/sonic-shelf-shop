@@ -43,32 +43,38 @@ export type Database = {
       }
       pc_builds: {
         Row: {
+          compatibility_notes: string[] | null
           components: Json | null
           created_at: string | null
           id: string
           is_public: boolean | null
           name: string
           total_price: number | null
+          total_wattage: number | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          compatibility_notes?: string[] | null
           components?: Json | null
           created_at?: string | null
           id?: string
           is_public?: boolean | null
           name: string
           total_price?: number | null
+          total_wattage?: number | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          compatibility_notes?: string[] | null
           components?: Json | null
           created_at?: string | null
           id?: string
           is_public?: boolean | null
           name?: string
           total_price?: number | null
+          total_wattage?: number | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -76,52 +82,82 @@ export type Database = {
       }
       pc_components: {
         Row: {
+          availability_status: string | null
           brand: string | null
           category_id: string | null
+          chipset: string | null
           compatibility_data: Json | null
           created_at: string | null
           description: string | null
+          dimensions: string | null
+          external_url: string | null
+          form_factor: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
+          last_price_update: string | null
+          max_memory: number | null
+          memory_slots: number | null
           model: string | null
           name: string
           price: number
+          socket_type: string | null
           specifications: Json | null
           stock_quantity: number | null
           updated_at: string | null
+          wattage: number | null
         }
         Insert: {
+          availability_status?: string | null
           brand?: string | null
           category_id?: string | null
+          chipset?: string | null
           compatibility_data?: Json | null
           created_at?: string | null
           description?: string | null
+          dimensions?: string | null
+          external_url?: string | null
+          form_factor?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          last_price_update?: string | null
+          max_memory?: number | null
+          memory_slots?: number | null
           model?: string | null
           name: string
           price?: number
+          socket_type?: string | null
           specifications?: Json | null
           stock_quantity?: number | null
           updated_at?: string | null
+          wattage?: number | null
         }
         Update: {
+          availability_status?: string | null
           brand?: string | null
           category_id?: string | null
+          chipset?: string | null
           compatibility_data?: Json | null
           created_at?: string | null
           description?: string | null
+          dimensions?: string | null
+          external_url?: string | null
+          form_factor?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          last_price_update?: string | null
+          max_memory?: number | null
+          memory_slots?: number | null
           model?: string | null
           name?: string
           price?: number
+          socket_type?: string | null
           specifications?: Json | null
           stock_quantity?: number | null
           updated_at?: string | null
+          wattage?: number | null
         }
         Relationships: [
           {

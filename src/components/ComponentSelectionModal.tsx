@@ -62,11 +62,21 @@ const ComponentSelectionModal: React.FC<ComponentSelectionModalProps> = ({
   const fetchCategoryComponents = async () => {
     setLoading(true);
     try {
+      // First get the category ID
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('component_categories')
+        .select('id')
+        .eq('slug', categorySlug)
+        .single();
+
+      if (categoryError) throw categoryError;
+
+      // Then fetch components for that category
       const { data, error } = await supabase
         .from('pc_components')
         .select('*, component_categories(name, slug)')
         .eq('is_active', true)
-        .eq('component_categories.slug', categorySlug);
+        .eq('category_id', categoryData.id);
 
       if (error) throw error;
       setComponents(data || []);

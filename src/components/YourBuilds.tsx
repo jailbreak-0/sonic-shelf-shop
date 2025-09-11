@@ -3,13 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Eye, Edit, Trash2, Calendar, DollarSign } from 'lucide-react';
+import { Eye, Edit, Trash2, Calendar, DollarSign, Zap, AlertTriangle, Settings, Box, Cpu, Monitor, CircuitBoard, MemoryStick, HardDrive, Fan, Keyboard, Mouse } from 'lucide-react';
 
 interface Build {
   id: string;
   name: string;
   components: any;
   total_price: number;
+  total_wattage?: number;
+  compatibility_notes?: string[];
   is_public: boolean;
   created_at: string;
 }
@@ -21,6 +23,20 @@ interface YourBuildsProps {
 }
 
 export function YourBuilds({ builds, onLoadBuild, onDeleteBuild }: YourBuildsProps) {
+  const categoryIcons = {
+    cpu: Cpu,
+    gpu: Monitor,
+    motherboard: CircuitBoard,
+    ram: MemoryStick,
+    storage: HardDrive,
+    psu: Zap,
+    case: Box,
+    cooling: Fan,
+    keyboard: Keyboard,
+    mouse: Mouse,
+    monitor: Monitor,
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -82,6 +98,16 @@ export function YourBuilds({ builds, onLoadBuild, onDeleteBuild }: YourBuildsPro
                     <span className="font-medium">{componentCount}</span>
                   </div>
                   
+                  {build.total_wattage && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        Wattage
+                      </span>
+                      <span className="font-medium">{build.total_wattage}W</span>
+                    </div>
+                  )}
+                  
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground text-sm flex items-center gap-1">
                       <DollarSign className="h-4 w-4" />
@@ -91,6 +117,45 @@ export function YourBuilds({ builds, onLoadBuild, onDeleteBuild }: YourBuildsPro
                       ₵{build.total_price?.toFixed(2) || '0.00'}
                     </span>
                   </div>
+                </div>
+
+                {build.compatibility_notes && build.compatibility_notes.length > 0 && (
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-orange-700 dark:text-orange-400 text-sm font-medium mb-1">
+                      <AlertTriangle className="h-4 w-4" />
+                      Compatibility Issues
+                    </div>
+                    <div className="space-y-1 max-h-20 overflow-y-auto">
+                      {build.compatibility_notes.slice(0, 2).map((note, index) => (
+                        <p key={index} className="text-xs text-orange-600 dark:text-orange-300">{note}</p>
+                      ))}
+                      {build.compatibility_notes.length > 2 && (
+                        <p className="text-xs text-orange-500">+{build.compatibility_notes.length - 2} more issues</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-3 gap-1">
+                  {Object.entries(build.components || {}).slice(0, 6).map(([category, component]: [string, any]) => {
+                    const IconComponent = categoryIcons[category] || Box;
+                    return (
+                      <div key={category} className="flex items-center gap-1 p-1 bg-muted rounded text-xs">
+                        <IconComponent className="h-3 w-3" />
+                        <span className="capitalize truncate">{category}</span>
+                        {Array.isArray(component) && (
+                          <Badge variant="secondary" className="text-xs ml-auto p-0 px-1 h-4">
+                            {component.length}
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {Object.keys(build.components || {}).length > 6 && (
+                    <div className="flex items-center justify-center p-1 bg-muted rounded text-xs text-muted-foreground">
+                      +{Object.keys(build.components || {}).length - 6}
+                    </div>
+                  )}
                 </div>
                 
                 <Separator />
@@ -102,8 +167,8 @@ export function YourBuilds({ builds, onLoadBuild, onDeleteBuild }: YourBuildsPro
                     className="flex-1"
                     onClick={() => onLoadBuild(build)}
                   >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Load
+                    <Settings className="h-4 w-4 mr-2" />
+                    Load Build
                   </Button>
                   
                   <Button

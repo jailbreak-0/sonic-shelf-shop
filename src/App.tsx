@@ -17,7 +17,7 @@ import NotFound from "./pages/NotFound";
 import ItemDetailsPage from "./pages/ItemDetailsPage";
 import Cart from "./pages/Cart";
 import Auth from "./pages/Auth";
-import PCBuilder from "./pages/PCBuilder";
+import PCBuilderNew from "./pages/PCBuilderNew";
 import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
@@ -42,7 +42,7 @@ const App = () => (
                 <Route path="/item/:id" element={<ItemDetailsPage />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/pc-builder" element={<PCBuilder />} />
+                <Route path="/pc-builder" element={<PCBuilderNew />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
